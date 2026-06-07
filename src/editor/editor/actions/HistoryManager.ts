@@ -1,4 +1,5 @@
 import { FloorPlan } from "../objects/FloorPlan";
+import { AddWallManager } from "./AddWallManager";
 
 /**
  * Snapshot-based undo/redo for the floor plan.
@@ -52,6 +53,15 @@ export class HistoryManager {
     /** Pushes the current plan onto the undo stack if it changed. */
     public commit() {
         if (this.restoring) {
+            return;
+        }
+        // Don't snapshot mid wall-draw. The wall tool's first click leaves a lone
+        // node (no wall yet) until the next click connects it. Recording that
+        // transient state would make undo step back to the orphan node instead of
+        // removing the wall cleanly. AddWallManager.previousNode is set while a
+        // chain is open and cleared when it ends (double-click) or the tool
+        // changes (resetTools), so the finished chain is captured on that pointerup.
+        if (AddWallManager.Instance.previousNode !== undefined) {
             return;
         }
         let snapshot: string;
