@@ -4,15 +4,10 @@ import { AddWallManager } from "./AddWallManager";
 /**
  * Snapshot-based undo/redo for the floor plan.
  *
- * The editor already serializes the whole plan through FloorPlan.save() /
- * FloorPlan.load(). Instead of giving every Action its own undo()/redo() (which
- * needs careful bookkeeping — e.g. restoring the node links a DeleteWallNode
- * removed, see the TODOs in WallNodeSequence), this records a JSON snapshot at
- * the end of each interaction and reloads a previous/next one to undo/redo.
- *
- * Bonus: it also covers moves and rotations, which are applied directly by the
- * transform handles and aren't modeled as Actions, so a command-based history
- * would miss them.
+ * The editor serializes the whole plan through FloorPlan.save() /
+ * FloorPlan.load(). Instead of giving every Action its own undo()/redo(), 
+ * this records a JSON snapshot at the end of each interaction and reloads 
+ * a previous/next one to undo/redo.
  */
 export class HistoryManager {
     private static instance: HistoryManager;
@@ -113,8 +108,6 @@ export class HistoryManager {
         } catch {
             /* malformed snapshot — ignore */
         }
-        // Release the guard after the current tick so the triggering pointerup's
-        // debounced commit doesn't re-record the state we just restored.
         setTimeout(() => {
             this.restoring = false;
         }, 80);
